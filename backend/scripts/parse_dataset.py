@@ -20,9 +20,17 @@ def parse_dataset(filepath):
     time_range = {}
     if "time" in ds.coords:
         times = ds["time"].values
+        
+        def format_date(t):
+            try:
+                return str(np.datetime_as_string(t, unit="D"))
+            except TypeError:
+                # Fallback for cftime datetime objects
+                return str(t)[:10]
+
         time_range = {
-            "start": str(np.datetime_as_string(times[0], unit="D")),
-            "end": str(np.datetime_as_string(times[-1], unit="D")),
+            "start": format_date(times[0]),
+            "end": format_date(times[-1]),
         }
 
     # Spatial coverage

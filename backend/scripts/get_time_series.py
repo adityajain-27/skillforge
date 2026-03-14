@@ -32,7 +32,13 @@ def get_time_series(filepath, variable, lat, lon):
 
     if "time" in data.dims:
         for t, v in zip(data.time.values, data.values):
-            times.append(str(np.datetime_as_string(t, unit="D")))
+            try:
+                t_str = str(np.datetime_as_string(t, unit="D"))
+            except TypeError:
+                # Handle cftime datetime objects
+                t_str = str(t)[:10]
+            
+            times.append(t_str)
             values.append(None if np.isnan(v) else round(float(v), 4))
     else:
         print(json.dumps({"error": "No time dimension in this dataset"}))

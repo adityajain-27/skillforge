@@ -10,7 +10,7 @@ const generateToken = (id) => {
 // @desc  Register new user
 // @route POST /api/auth/signup
 // @access Public
-export const signup = async (req, res) => {
+export const signup = async (req, res, next) => {
   try {
     const { name, email, password, role } = req.body;
 
@@ -38,14 +38,14 @@ export const signup = async (req, res) => {
       token: generateToken(user._id),
     });
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 
 // @desc  Login user
 // @route POST /api/auth/login
 // @access Public
-export const login = async (req, res) => {
+export const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
@@ -67,7 +67,7 @@ export const login = async (req, res) => {
       token: generateToken(user._id),
     });
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 
