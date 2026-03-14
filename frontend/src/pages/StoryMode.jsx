@@ -1,7 +1,124 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { getStories, getStory, getComments, addComment } from '../services/api';
+import { useAuth } from '../context/AuthContext';
+
+// Fallback stories shown when the backend is offline
+const SAMPLE_STORIES = [
+  {
+    id: 'story-1',
+    title: 'The Warming Arctic: A Race Against Time',
+    region: 'Arctic Circle',
+    variable: 'temperature',
+    description: 'Arctic temperatures are rising four times faster than the global average. This story explores the cascading effects on sea ice, permafrost, and global weather patterns.',
+    highlight: 'The Arctic could be ice-free in summer as early as 2035, fundamentally altering ecosystems and global ocean circulation.',
+    centerLat: '78.2', centerLon: '15.5',
+    newsKeywords: ['arctic warming', 'sea ice', 'permafrost'],
+  },
+  {
+    id: 'story-2',
+    title: 'Monsoon Extremes: Too Much, Too Little',
+    region: 'South Asia',
+    variable: 'precipitation',
+    description: 'Climate change is intensifying South Asian monsoon variability, bringing devastating floods to some regions while creating severe drought conditions in others.',
+    highlight: 'Extreme precipitation events have increased 30% in frequency since 2000 across South Asia.',
+    centerLat: '20.5', centerLon: '78.9',
+    newsKeywords: ['India floods', 'monsoon', 'drought'],
+  },
+  {
+    id: 'story-3',
+    title: 'Ocean Heat Content: The Hidden Crisis',
+    region: 'Global Oceans',
+    variable: 'temperature',
+    description: 'The oceans have absorbed over 90% of the excess heat trapped by greenhouse gases. As ocean heat content rises, we see intensified hurricanes, coral bleaching, and sea-level rise.',
+    highlight: 'Ocean heat content in 2026 surpassed all previous records, with the top 2000m of ocean absorbing unprecedented amounts of thermal energy.',
+    centerLat: '0', centerLon: '-30',
+    newsKeywords: ['sea level rise', 'coral bleaching', 'ocean warming'],
+  },
+];
+
+// Tag colour map
+const TAG_COLORS = {
+  temperature: 'bg-orange-500',
+  precipitation: 'bg-emerald-500',
+  arctic: 'bg-primary',
+};
 
 const StoryMode = () => {
+  const { user, token } = useAuth();
+
+  const [stories, setStories] = useState([]);
+  const [loadingStories, setLoadingStories] = useState(true);
+  const [storiesError, setStoriesError] = useState('');
+
+  const [activeStory, setActiveStory] = useState(null);
+  const [loadingStory, setLoadingStory] = useState(false);
+
+  const [comments, setComments] = useState([]);
+  const [commentText, setCommentText] = useState('');
+  const [submittingComment, setSubmittingComment] = useState(false);
+  const [commentError, setCommentError] = useState('');
+
+  // Load story list on mount
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const data = await getStories();
+        setStories(Array.isArray(data) && data.length > 0 ? data : SAMPLE_STORIES);
+      } catch {
+        // Backend offline — use sample stories silently
+        setStories(SAMPLE_STORIES);
+      } finally {
+        setLoadingStories(false);
+      }
+    };
+    load();
+  }, []);
+
+  // Load a single story + its comments
+  const openStory = async (id) => {
+    setLoadingStory(true);
+    setActiveStory(null);
+    setComments([]);
+    setCommentError('');
+    try {
+      const [storyData, commentsData] = await Promise.all([
+        getStory(id),
+        token ? getComments({ storyId: id }).catch(() => []) : Promise.resolve([]),
+      ]);
+      setActiveStory(storyData);
+      setComments(commentsData);
+    } catch (err) {
+      setStoriesError(err.message || 'Failed to load story.');
+    } finally {
+      setLoadingStory(false);
+    }
+  };
+
+  const closeStory = () => {
+    setActiveStory(null);
+    setComments([]);
+    setCommentText('');
+  };
+
+  const handleAddComment = async (e) => {
+    e.preventDefault();
+    if (!commentText.trim()) return;
+    setSubmittingComment(true);
+    setCommentError('');
+    try {
+      const newComment = await addComment({ storyId: activeStory.id, text: commentText.trim() });
+      setComments((prev) => [newComment, ...prev]);
+      setCommentText('');
+    } catch (err) {
+      setCommentError(err.message || 'Failed to post comment.');
+    } finally {
+      setSubmittingComment(false);
+    }
+  };
+
+  const tagColor = (variable) =>
+    TAG_COLORS[variable] || 'bg-slate-500';
+
   return (
     <>
       {/* TopBar */}
@@ -9,20 +126,17 @@ const StoryMode = () => {
         <div className="flex-1 max-w-xl">
           <div className="relative hidden sm:block">
             <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl">search</span>
-            <input 
+            <input
               readOnly
-              className="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-xl py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-primary" 
-              placeholder="Search stories, regions, or data sets..." 
-              type="text" 
+              className="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-xl py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-primary"
+              placeholder="Search stories, regions, or data sets..."
+              type="text"
             />
           </div>
         </div>
         <div className="flex items-center gap-4">
           <button className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
             <span className="material-symbols-outlined">notifications</span>
-          </button>
-          <button className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
-            <span className="material-symbols-outlined">settings</span>
           </button>
         </div>
       </header>
@@ -34,202 +148,180 @@ const StoryMode = () => {
           <p className="text-slate-500 text-lg">Guided data narratives for everyone</p>
         </div>
 
+        {/* Error */}
+        {storiesError && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600">{storiesError}</div>
+        )}
+
+        {/* Loading */}
+        {loadingStories && (
+          <div className="flex items-center justify-center h-48 text-slate-400">
+            <span className="material-symbols-outlined animate-spin mr-2">autorenew</span> Loading stories…
+          </div>
+        )}
+
         {/* Story Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-          {/* Card 1 */}
-          <div className="group bg-white dark:bg-slate-900 rounded-xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800 hover:shadow-xl transition-all duration-300">
-            <div className="aspect-video relative overflow-hidden bg-slate-200">
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent z-10"></div>
-              <img 
-                alt="Arctic Ice" 
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCnoMIC_7HcdpTfuXBHPoMtP7mLD4pxv9OYh3j2ka9hTA1ANGU1ZUEdVB3d3ize-qFVUuePXlDyaxQ8LHheAdNVRRsqAKlJfFYTqtNtA-0wPMzwxv-pj522CAjVx2wfMHaUzholB6b8ZuRM-YyoV8KhbgKTBrNCbF33FKANiaT6p9yIsGn8KiIO12uS9EMnCCpCCcooL-0UJd5hQyaVxYXMC0_drhrRrBDcLsrNXDLdqweY6kuDaqSkReFsO_fxTX7Gsq1_ZOg9yNk" 
-              />
-              <span className="absolute top-4 left-4 bg-primary text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider z-20">Atmosphere</span>
-            </div>
-            <div className="p-6">
-              <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">Arctic Warming Crisis</h3>
-              <p className="text-slate-500 text-sm leading-relaxed mb-4">A deep dive into the rapid melting of polar ice caps and its global impact on sea levels.</p>
-              <Link className="inline-flex items-center text-primary font-bold text-sm hover:underline" to="/dashboard">
-                Explore Story <span className="material-symbols-outlined ml-1 text-base">arrow_forward</span>
-              </Link>
-            </div>
-          </div>
-
-          {/* Card 2 */}
-          <div className="group bg-white dark:bg-slate-900 rounded-xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800 hover:shadow-xl transition-all duration-300">
-            <div className="aspect-video relative overflow-hidden bg-slate-200">
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent z-10"></div>
-              <img 
-                alt="Heavy Rain" 
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuALOb7CkOuGuYvtPdfJZZPUPAIpT5uW9OdjbJr7nApjm7NlbNC42zIXYL7o7r1t5LBnhh13vvDplStgpPMtYdOEupvbIgyptuP24hyMXdCWKakKg7nIx7200zCpnXaF9-JELCExPCbBwvToERvuEMjpuRM4-v4WfDZPS2BBadIoJGCgkSDYTEasKTWp6CF6cQEdYrpN7PjfLH7wjYcc9CNU8tqJg85cPIaqJ2GsbM2ZdwvyibAnZgNeR5uKqgWeW6He-Ewb7Z8acIM" 
-              />
-              <span className="absolute top-4 left-4 bg-emerald-500 text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider z-20">Hydrology</span>
-            </div>
-            <div className="p-6">
-              <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">Extreme Rainfall Zones</h3>
-              <p className="text-slate-500 text-sm leading-relaxed mb-4">Analyzing the shift in precipitation patterns and identifying high-risk urban flood areas.</p>
-              <Link className="inline-flex items-center text-primary font-bold text-sm hover:underline" to="/dashboard">
-                Explore Story <span className="material-symbols-outlined ml-1 text-base">arrow_forward</span>
-              </Link>
-            </div>
-          </div>
-
-          {/* Card 3 */}
-          <div className="group bg-white dark:bg-slate-900 rounded-xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800 hover:shadow-xl transition-all duration-300">
-            <div className="aspect-video relative overflow-hidden bg-slate-200">
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent z-10"></div>
-              <img 
-                alt="Sun Heat" 
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBQjngHCTiV2uxYLR2uY-KPenabCNBtivXOYA0t1SKnvRbBPfygO-I3cgK1NBQYDlW9y7u4J-JhXPBa14FdSpqBjBuiemQh_Xo1MObX1rS-YS5DcEtNbfD1GUv1wkG8plOJGD1eUxe4TQkkKbcuSttfK-Nn1Qcx1eVv3AyCIKfBC7sSYlUOolWk08QU1kxMKTgIz9XzDyq8zsDI7Ng95630f2SzOcGphGfWyS6_DlRLF1K0vsQRSzRSxZFyAo_-ghRQdKAW0-FTXXY" 
-              />
-              <span className="absolute top-4 left-4 bg-orange-500 text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider z-20">Temperature</span>
-            </div>
-            <div className="p-6">
-              <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">Rising Global Temperatures</h3>
-              <p className="text-slate-500 text-sm leading-relaxed mb-4">Tracking the steady 1.2°C increase in average global surface temperatures since 1880.</p>
-              <Link className="inline-flex items-center text-primary font-bold text-sm hover:underline" to="/dashboard">
-                Explore Story <span className="material-symbols-outlined ml-1 text-base">arrow_forward</span>
-              </Link>
-            </div>
-          </div>
-        </div>
-
-        {/* Story Detail View Section (Active View Simulation) */}
-        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xl mb-12">
-          {/* Progress Header */}
-          <div className="h-16 bg-slate-50 dark:bg-slate-800/50 flex flex-wrap items-center justify-between px-4 sm:px-8 border-b border-slate-100 dark:border-slate-800">
-            <button className="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
-              <span className="material-symbols-outlined">close</span>
-            </button>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-primary"></div>
-              <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-primary"></div>
-              <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-primary"></div>
-              <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-slate-300 dark:bg-slate-600"></div>
-              <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-slate-300 dark:bg-slate-600"></div>
-            </div>
-            <div className="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-widest hidden sm:block">Part 3 of 5</div>
-          </div>
-
-          {/* Story Content 2-Col Layout */}
-          <div className="flex flex-col lg:flex-row">
-            {/* Text Column */}
-            <div className="w-full lg:w-3/5 p-6 sm:p-8 lg:p-12 border-b lg:border-b-0 lg:border-r border-slate-100 dark:border-slate-800">
-              <span className="text-primary font-bold text-xs uppercase tracking-widest mb-4 block">Oceanic Influence</span>
-              <h2 className="text-2xl sm:text-3xl lg:text-5xl font-black mb-8 leading-tight">The Albedo Effect & Surface Absorption</h2>
-              <div className="prose prose-slate dark:prose-invert max-w-none space-y-6 text-slate-600 dark:text-slate-400">
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white">Why the Arctic is warming 4x faster</h3>
-                <p className="text-base sm:text-lg leading-relaxed">
-                  As white ice melts, it exposes the dark ocean water beneath. This creates a dangerous feedback loop known as the <strong className="text-slate-900 dark:text-white">Ice-Albedo Feedback</strong>. White ice reflects up to 80% of solar radiation back into space, while dark open water absorbs 90% of it.
-                </p>
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white">Regional Disparity in Heat Capture</h3>
-                <p className="text-base sm:text-lg leading-relaxed">
-                  Data from the last decade shows a significant correlation between reduced ice thickness in the Beaufort Sea and localized heat spikes in the upper atmosphere. This thermal energy isn't just staying in the Arctic; it’s disrupting the jet stream and causing extreme weather events in the mid-latitudes.
-                </p>
-
-                <div className="bg-primary/5 border-l-4 border-primary p-4 sm:p-6 rounded-r-xl">
-                  <p className="italic text-primary-900 dark:text-primary-100">"The Arctic is the refrigerator of the planet. As it warms, the door is effectively being left open, affecting climate stability globally."</p>
-                  <p className="text-sm font-bold mt-2">— IPCC Special Report on Oceans and Cryosphere</p>
+        {!loadingStories && stories.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+            {stories.map((story) => (
+              <div
+                key={story.id}
+                className="group bg-white dark:bg-slate-900 rounded-xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800 hover:shadow-xl transition-all duration-300"
+              >
+                <div className="aspect-video relative overflow-hidden bg-slate-200 dark:bg-slate-800">
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent z-10"></div>
+                  {/* Placeholder gradient based on variable */}
+                  <div
+                    className="w-full h-full"
+                    style={{
+                      background:
+                        story.variable === 'temperature'
+                          ? 'linear-gradient(135deg, #0f172a 0%, #7c3aed 50%, #f59e0b 100%)'
+                          : story.variable === 'precipitation'
+                          ? 'linear-gradient(135deg, #0f172a 0%, #0284c7 50%, #10b981 100%)'
+                          : 'linear-gradient(135deg, #0f172a 0%, #2563eb 100%)',
+                    }}
+                  />
+                  <span className={`absolute top-4 left-4 ${tagColor(story.variable)} text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider z-20`}>
+                    {story.variable}
+                  </span>
+                </div>
+                <div className="p-6">
+                  <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">{story.title}</h3>
+                  <p className="text-slate-500 text-sm leading-relaxed mb-3 line-clamp-2">{story.description}</p>
+                  <p className="text-[11px] text-slate-400 mb-4 font-mono">{story.region}</p>
+                  <button
+                    id={`story-explore-${story.id}`}
+                    onClick={() => openStory(story.id)}
+                    className="inline-flex items-center text-primary font-bold text-sm hover:underline"
+                  >
+                    Explore Story{' '}
+                    <span className="material-symbols-outlined ml-1 text-base">arrow_forward</span>
+                  </button>
                 </div>
               </div>
+            ))}
+          </div>
+        )}
 
-              <div className="mt-8 sm:mt-12 flex flex-wrap gap-4">
-                <Link to="/dashboard" className="px-6 sm:px-8 py-3 bg-primary text-white font-bold rounded-xl hover:bg-blue-600 transition-colors flex items-center gap-2">
-                  Continue <span className="material-symbols-outlined">arrow_right_alt</span>
-                </Link>
-                <Link to="/dashboard" className="px-6 sm:px-8 py-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold rounded-xl hover:bg-slate-200 transition-colors inline-block">
-                  Back
-                </Link>
-              </div>
+        {/* Story Detail View */}
+        {loadingStory && (
+          <div className="flex items-center justify-center h-48 text-slate-400">
+            <span className="material-symbols-outlined animate-spin mr-2">autorenew</span> Loading story…
+          </div>
+        )}
+
+        {activeStory && !loadingStory && (
+          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xl mb-12">
+            {/* Story Header */}
+            <div className="h-16 bg-slate-50 dark:bg-slate-800/50 flex items-center justify-between px-4 sm:px-8 border-b border-slate-100 dark:border-slate-800">
+              <button
+                id="story-close"
+                onClick={closeStory}
+                className="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+              >
+                <span className="material-symbols-outlined">close</span>
+              </button>
+              <h2 className="font-bold text-lg text-slate-800 dark:text-white">{activeStory.title}</h2>
+              <span className="text-xs text-slate-400 font-mono hidden sm:block uppercase">{activeStory.region}</span>
             </div>
 
-            {/* Visuals Column */}
-            <div className="w-full lg:w-2/5 bg-slate-50 dark:bg-slate-950/50 p-6 sm:p-8 lg:p-12 flex flex-col gap-8">
-              {/* Heatmap Visual */}
-              <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800">
-                <div className="flex items-center justify-between mb-4">
-                  <h4 className="font-bold text-sm">Thermal Anomaly Map</h4>
-                  <span className="text-[10px] text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded">2014 - 2024</span>
-                </div>
-                <div className="aspect-square rounded-xl overflow-hidden relative">
-                  {/* Gradient Mesh Background simulating heatmap */}
-                  <div className="absolute inset-0 opacity-80" style={{ background: 'radial-gradient(circle at 70% 30%, #f43f5e 0%, transparent 40%), radial-gradient(circle at 30% 60%, #fb923c 0%, transparent 50%), radial-gradient(circle at 10% 10%, #3b82f6 0%, transparent 40%), #1e293b' }}></div>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="material-symbols-outlined text-white/20 text-9xl">public</span>
+            {/* Story Content */}
+            <div className="flex flex-col lg:flex-row">
+              {/* Text */}
+              <div className="w-full lg:w-3/5 p-6 sm:p-8 lg:p-12 border-b lg:border-b-0 lg:border-r border-slate-100 dark:border-slate-800">
+                <span className="text-primary font-bold text-xs uppercase tracking-widest mb-4 block">{activeStory.variable}</span>
+                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black mb-6 leading-tight">{activeStory.title}</h2>
+                <p className="text-base leading-relaxed text-slate-600 dark:text-slate-400 mb-6">{activeStory.description}</p>
+                {activeStory.highlight && (
+                  <div className="bg-primary/5 border-l-4 border-primary p-4 sm:p-6 rounded-r-xl mb-6">
+                    <p className="italic text-primary-900 dark:text-primary-100 text-sm">{activeStory.highlight}</p>
                   </div>
-                  <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end">
-                    <div className="flex flex-col gap-1 w-full max-w-[120px]">
-                      <div className="h-2 w-full rounded bg-gradient-to-r from-blue-500 via-orange-400 to-red-600"></div>
-                      <div className="flex justify-between text-[8px] text-white/70 uppercase">
-                        <span>-2.0°C</span>
-                        <span>+4.5°C</span>
-                      </div>
+                )}
+                {activeStory.newsKeywords && (
+                  <div className="flex flex-wrap gap-2">
+                    {activeStory.newsKeywords.map((kw) => (
+                      <span key={kw} className="px-3 py-1 bg-primary/10 text-primary text-xs font-bold rounded-full uppercase">{kw}</span>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Visual column */}
+              <div className="w-full lg:w-2/5 bg-slate-50 dark:bg-slate-950/50 p-6 sm:p-8 lg:p-12 flex flex-col gap-8">
+                {/* Globe centred on story */}
+                <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800">
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="font-bold text-sm">Focus Region</h4>
+                    <span className="text-[10px] text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded font-mono">
+                      {activeStory.centerLat}°N, {activeStory.centerLon}°E
+                    </span>
+                  </div>
+                  <div
+                    className="aspect-square rounded-xl overflow-hidden relative"
+                    style={{
+                      background:
+                        activeStory.variable === 'temperature'
+                          ? 'radial-gradient(circle at 60% 40%, #f43f5e 0%, transparent 40%), radial-gradient(circle at 30% 60%, #fb923c 0%, transparent 50%), #1e293b'
+                          : 'radial-gradient(circle at 40% 50%, #0ea5e9 0%, transparent 50%), radial-gradient(circle at 65% 30%, #10b981 0%, transparent 40%), #1e293b',
+                    }}
+                  >
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="material-symbols-outlined text-white/20 text-9xl">public</span>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Line Chart Visual */}
-              <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800">
-                <div className="flex items-center justify-between mb-6">
-                  <h4 className="font-bold text-sm">Ice Coverage Loss %</h4>
-                  <span className="material-symbols-outlined text-slate-400">trending_down</span>
-                </div>
-                <div className="h-40 relative flex items-end gap-1 sm:gap-2">
-                  {/* Simplified Bar/Line Hybrid Visualization */}
-                  <div className="flex-1 bg-primary/20 rounded-t h-[90%] relative group">
-                    <div className="absolute inset-x-0 bottom-0 bg-primary rounded-t h-[70%] group-hover:h-[75%] transition-all"></div>
+                {/* Comments panel */}
+                <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800">
+                  <h4 className="font-bold text-sm mb-4 flex items-center gap-2">
+                    <span className="material-symbols-outlined text-primary text-lg">chat_bubble</span>
+                    Discussion ({comments.length})
+                  </h4>
+
+                  {/* Comment form */}
+                  {token ? (
+                    <form onSubmit={handleAddComment} className="mb-4">
+                      <textarea
+                        id="comment-input"
+                        value={commentText}
+                        onChange={(e) => setCommentText(e.target.value)}
+                        placeholder="Add a comment or annotation…"
+                        rows={2}
+                        className="w-full text-sm px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none resize-none mb-2"
+                        required
+                      />
+                      {commentError && <p className="text-xs text-red-500 mb-2">{commentError}</p>}
+                      <button
+                        id="comment-submit"
+                        type="submit"
+                        disabled={submittingComment}
+                        className="w-full bg-primary text-white text-xs font-bold py-2 rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-60"
+                      >
+                        {submittingComment ? 'Posting…' : 'Post Comment'}
+                      </button>
+                    </form>
+                  ) : (
+                    <p className="text-xs text-slate-400 mb-4">Sign in to leave a comment.</p>
+                  )}
+
+                  {/* Comment list */}
+                  <div className="space-y-3 max-h-48 overflow-y-auto">
+                    {comments.length === 0 && (
+                      <p className="text-xs text-slate-400 text-center py-4">No comments yet.</p>
+                    )}
+                    {comments.map((c) => (
+                      <div key={c._id} className="p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                        <p className="text-xs font-bold text-slate-600 dark:text-slate-300">{c.author?.name || 'Anonymous'}</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{c.text}</p>
+                      </div>
+                    ))}
                   </div>
-                  <div className="flex-1 bg-primary/20 rounded-t h-[85%] relative group">
-                    <div className="absolute inset-x-0 bottom-0 bg-primary rounded-t h-[60%] group-hover:h-[65%] transition-all"></div>
-                  </div>
-                  <div className="flex-1 bg-primary/20 rounded-t h-[80%] relative group">
-                    <div className="absolute inset-x-0 bottom-0 bg-primary rounded-t h-[55%] group-hover:h-[60%] transition-all"></div>
-                  </div>
-                  <div className="flex-1 bg-primary/20 rounded-t h-[70%] relative group">
-                    <div className="absolute inset-x-0 bottom-0 bg-primary rounded-t h-[40%] group-hover:h-[45%] transition-all"></div>
-                  </div>
-                  <div className="flex-1 bg-primary/20 rounded-t h-[60%] relative group">
-                    <div className="absolute inset-x-0 bottom-0 bg-primary rounded-t h-[30%] group-hover:h-[35%] transition-all"></div>
-                  </div>
-                  <div className="flex-1 bg-primary/20 rounded-t h-[55%] relative group">
-                    <div className="absolute inset-x-0 bottom-0 bg-primary rounded-t h-[20%] group-hover:h-[25%] transition-all"></div>
-                  </div>
-                </div>
-                <div className="flex justify-between mt-4 text-[8px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-tighter">
-                  <span>2000</span>
-                  <span>2005</span>
-                  <span>2010</span>
-                  <span>2015</span>
-                  <span>2020</span>
-                  <span>2024</span>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Progress Tracker Footer */}
-        <div className="bg-slate-200 dark:bg-slate-800 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-6 mb-20 max-w-4xl mx-auto">
-          <div className="flex items-center gap-4">
-            <div className="size-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
-              <span className="material-symbols-outlined">auto_stories</span>
-            </div>
-            <div>
-              <p className="font-bold text-sm">Overall Learning Progress</p>
-              <p className="text-xs text-slate-500">2 of 12 stories completed</p>
-            </div>
-          </div>
-          <div className="flex-1 w-full md:max-w-md mx-0 md:mx-12">
-            <div className="h-2 w-full bg-slate-300 dark:bg-slate-700 rounded-full overflow-hidden">
-              <div className="h-full bg-primary" style={{ width: '16%' }}></div>
-            </div>
-          </div>
-          <Link to="/dashboard" className="text-sm font-bold text-primary hover:underline whitespace-nowrap">View Badges</Link>
-        </div>
+        )}
       </div>
     </>
   );

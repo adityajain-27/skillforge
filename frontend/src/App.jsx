@@ -1,8 +1,9 @@
 import React from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import MainLayout from './components/layout/MainLayout'
+import ProtectedRoute from './components/ProtectedRoute'
 
-// Pages (to be imported later)
+// Pages
 import LandingPage from './pages/LandingPage'
 import SignInSignUp from './pages/SignInSignUp'
 import DashboardLayout from './components/layout/DashboardLayout'
@@ -21,13 +22,21 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Public routes */}
         <Route path="/" element={<MainLayout />}>
           <Route index element={<LandingPage />} />
           <Route path="login" element={<SignInSignUp />} />
         </Route>
-        
-        {/* Dashboard Routes with Sidebar */}
-        <Route path="/dashboard" element={<DashboardLayout />}>
+
+        {/* Protected dashboard routes — require login */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout />
+            </ProtectedRoute>
+          }
+        >
           <Route index element={<ResearcherDashboard />} />
           <Route path="upload" element={<DatasetUpload />} />
           <Route path="compare" element={<DatasetComparison />} />
@@ -37,10 +46,17 @@ function App() {
           <Route path="reports" element={<ReportExport />} />
         </Route>
 
-        {/* Fullscreen globe view without sidebar */}
-        <Route path="/dashboard/globe" element={<GlobeView />} />
+        {/* Fullscreen globe view (protected) */}
+        <Route
+          path="/dashboard/globe"
+          element={
+            <ProtectedRoute>
+              <GlobeView />
+            </ProtectedRoute>
+          }
+        />
 
-        {/* Freemium Public user route */}
+        {/* Public user freemium route */}
         <Route path="/public" element={<PublicDashboard />} />
 
         {/* UI Component Kit */}
