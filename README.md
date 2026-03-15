@@ -16,6 +16,7 @@
 
 <p align="center">
   <a href="https://cli-lens.vercel.app">🔗 Live Demo</a> •
+  <a href="https://drive.google.com/file/d/11oDQog4BsvgoyL7C9saj2jgHu_qvCMT9/view?usp=drivesdk">🎥 Project Video</a> •
   <a href="#features">✨ Features</a> •
   <a href="#tech-stack">🛠️ Tech Stack</a> •
   <a href="#getting-started">🚀 Getting Started</a>
