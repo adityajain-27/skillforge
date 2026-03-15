@@ -10,7 +10,7 @@ const ComponentSheet = () => {
         <header className="mb-12 border-b border-slate-200 dark:border-slate-800 pb-8">
           <div className="flex items-center gap-3 mb-2">
             <span className="material-symbols-outlined text-primary text-4xl">architecture</span>
-            <h1 className="text-4xl font-black tracking-tight font-mono">PyClimaExplorer <span className="text-primary">UI_KIT</span></h1>
+            <h1 className="text-4xl font-black tracking-tight font-mono">Cli-Lens <span className="text-primary">UI_KIT</span></h1>
           </div>
           <p className="text-slate-500 dark:text-slate-400 text-lg">Design System & Component Library for Climate Research Analytics</p>
         </header>
@@ -129,7 +129,7 @@ const ComponentSheet = () => {
                   </div>
                   <div className="flex-1 text-center md:text-left">
                     <span className="material-symbols-outlined text-primary/40 text-4xl mb-2">format_quote</span>
-                    <p className="text-xl italic text-slate-700 dark:text-slate-300 leading-relaxed">"The PyClimaExplorer tool transformed how we process MODIS data. What used to take weeks now takes minutes, allowing us to focus on policy implications rather than ETL."</p>
+                    <p className="text-xl italic text-slate-700 dark:text-slate-300 leading-relaxed">"The Cli-Lens tool transformed how we process MODIS data. What used to take weeks now takes minutes, allowing us to focus on policy implications rather than ETL."</p>
                     <div className="mt-4">
                       <p className="font-bold font-mono text-primary">Dr. Marcus Vane</p>
                       <p className="text-sm text-slate-500">Chief Hydrologist, Arctic Alliance</p>
@@ -320,12 +320,12 @@ const ComponentSheet = () => {
 
         <footer className="mt-32 pt-12 border-t border-slate-200 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center gap-6 opacity-60">
           <div className="flex items-center gap-2 font-mono font-bold">
-            <span className="material-symbols-outlined text-primary">cloud</span> PyClima System v2.0.4
+            <span className="material-symbols-outlined text-primary">cloud</span> Cli-Lens System v2.0.4
           </div>
           <div className="flex gap-8 text-sm">
             <Link className="hover:text-primary transition-colors" to="/components">Documentation</Link>
             <Link className="hover:text-primary transition-colors" to="/components">API Reference</Link>
-            <a className="hover:text-primary transition-colors" href="https://github.com/your-username/pyclima-react" target="_blank" rel="noopener noreferrer">Github</a>
+            <a className="hover:text-primary transition-colors" href="https://github.com/your-username/cli-lens" target="_blank" rel="noopener noreferrer">Github</a>
           </div>
         </footer>
       </div>

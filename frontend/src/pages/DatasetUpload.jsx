@@ -42,10 +42,7 @@ const DatasetUpload = () => {
     if (!file) { setError('Please select a .nc file first.'); return; }
     if (!isResearcher) { setError('Only researchers can upload datasets.'); return; }
 
-    if (user?.tier === 'free' && user?.datasetsAnalyzed >= 3) {
-      setError('Free tier limit reached (3 analyses). Upgrade to Pro.');
-      return;
-    }
+
 
     const formData = new FormData();
     formData.append('dataset', file);

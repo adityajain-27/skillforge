@@ -15,15 +15,11 @@ const Navbar = () => {
     <nav className="fixed top-0 w-full h-[64px] bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 z-50 px-6 flex items-center justify-between">
       <div className="flex items-center gap-2">
         <span className="material-symbols-outlined text-primary" style={{ fontSize: '24px' }}>public</span>
-        <Link to="/" className="text-[16px] font-semibold text-slate-900 dark:text-white">PyClimaExplorer</Link>
+        <Link to="/" className="text-[16px] font-semibold text-slate-900 dark:text-white">Cli-Lens</Link>
       </div>
-      <div className="hidden md:flex items-center gap-8">
-        <Link to="/public" className="text-[14px] font-medium text-slate-500 hover:text-primary transition-colors">Features</Link>
-        <Link to="/dashboard/stories" className="text-[14px] font-medium text-slate-500 hover:text-primary transition-colors">Story Mode</Link>
-        <Link to="/dashboard" className="text-[14px] font-medium text-slate-500 hover:text-primary transition-colors">Researchers</Link>
-        <Link to="/components" className="text-[14px] font-medium text-slate-500 hover:text-primary transition-colors">Components Kit</Link>
-      </div>
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-8">
+        <Link to="/about" className="hidden md:block text-[14px] font-medium text-slate-500 hover:text-primary transition-colors">About Us</Link>
+        <Link to="/contact" className="hidden md:block text-[14px] font-medium text-slate-500 hover:text-primary transition-colors">Contact</Link>
         {user ? (
           <>
             <span className="text-sm text-slate-600 dark:text-slate-300 hidden sm:block">

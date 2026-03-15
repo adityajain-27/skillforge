@@ -66,7 +66,7 @@ const DatasetComparison = () => {
     
     const report = {
       generatedAt: new Date().toISOString(),
-      platform: 'PyClima Explorer',
+      platform: 'Cli-Lens',
       analysisType: 'Dataset Comparison',
       variable: result.variable,
       datasetA: {
@@ -91,7 +91,7 @@ const DatasetComparison = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `pyclima-compare-report-${result.variable}-${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `cli-lens-compare-report-${result.variable}-${new Date().toISOString().split('T')[0]}.json`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -114,14 +114,32 @@ const DatasetComparison = () => {
       </header>
 
       <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto w-full flex-1 overflow-y-auto bg-background-light dark:bg-background-dark">
-        {/* Selector Row */}
-        <section className="bg-white dark:bg-slate-900 p-5 md:p-[20px] rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-          {!isPro && (
-            <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-700 flex items-center gap-2">
-              <span className="material-symbols-outlined text-lg">lock</span>
-              This feature requires a <strong>Pro</strong> subscription. Upgrade to run comparisons.
+
+        {/* Pro gate — blocks non-Pro users */}
+        {!isPro && (
+          <div className="flex flex-col items-center justify-center py-24 text-center">
+            <div className="w-20 h-20 rounded-2xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center mb-6">
+              <span className="material-symbols-outlined text-amber-500" style={{ fontSize: 40 }}>lock</span>
             </div>
-          )}
+            <h2 className="text-[24px] font-bold text-slate-900 dark:text-white mb-2">Pro Feature</h2>
+            <p className="text-slate-500 dark:text-slate-400 text-[15px] mb-8 max-w-[420px]">
+              Dataset comparison is available on the <strong>Researcher Pro</strong> plan.
+              Upgrade to compare multiple climate models side-by-side and download full contrast reports.
+            </p>
+            <a
+              href="/contact"
+              className="inline-flex items-center gap-2 bg-primary text-white font-bold px-8 py-3 rounded-xl shadow-lg shadow-primary/20 hover:bg-blue-600 transition-colors"
+            >
+              <span className="material-symbols-outlined text-[18px]">mail</span>
+              Contact Us to Upgrade
+            </a>
+          </div>
+        )}
+
+        {/* Selector Row — only shown to Pro users */}
+        {isPro && (
+        <section className="bg-white dark:bg-slate-900 p-5 md:p-[20px] rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr_1fr_auto] gap-6 items-end">
             <div className="space-y-2">
               <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider" htmlFor="ds-a">Dataset A</label>
@@ -190,14 +208,15 @@ const DatasetComparison = () => {
             </button>
           </div>
         </section>
+        )} {/* end isPro */}
 
         {/* Error */}
-        {error && (
+        {isPro && error && (
           <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600">{error}</div>
         )}
 
         {/* Results — real data from backend */}
-        {result && (
+        {isPro && result && (
           <div className="space-y-8">
             <div className="flex items-center justify-between bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm mb-2">
               <div>

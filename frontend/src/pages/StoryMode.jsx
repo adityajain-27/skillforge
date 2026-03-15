@@ -18,6 +18,7 @@ const SAMPLE_STORIES = [
     highlight: 'Temperature anomalies in the Arctic exceed +3°C above baseline in recent decades, with September sea ice extent declining at 13% per decade.',
     centerLat: '80', centerLon: '0',
     newsKeywords: ['arctic warming', 'sea ice', 'polar vortex'],
+    imageUrl: 'https://images.unsplash.com/photo-1518002054494-3a6f94352e9d?w=800&q=80',
   },
   {
     id: 'extreme-rainfall-india',
@@ -28,6 +29,7 @@ const SAMPLE_STORIES = [
     highlight: 'Precipitation variability has increased by 20% since 1980 over peninsular India.',
     centerLat: '22', centerLon: '80',
     newsKeywords: ['India floods', 'monsoon', 'extreme rainfall India'],
+    imageUrl: 'https://images.unsplash.com/photo-1580227221469-5a507bd4047a?w=800&q=80',
   },
   {
     id: 'rising-global-temperatures',
@@ -38,6 +40,7 @@ const SAMPLE_STORIES = [
     highlight: '2024 shattered temperature records globally, with mean surface temperature reaching 1.35°C above the pre-industrial baseline.',
     centerLat: '0', centerLon: '0',
     newsKeywords: ['global warming', 'climate change', 'record temperatures'],
+    imageUrl: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&q=80',
   },
   {
     id: 'coral-reef-crisis',
@@ -48,6 +51,7 @@ const SAMPLE_STORIES = [
     highlight: 'Over 50% of the world\'s coral reefs have been lost in the past 30 years.',
     centerLat: '-18', centerLon: '150',
     newsKeywords: ['coral bleaching', 'ocean warming', 'marine ecosystems'],
+    imageUrl: 'https://images.unsplash.com/photo-1546026423-cc4642628d2b?w=800&q=80',
   },
   {
     id: 'sahel-desertification',
@@ -58,6 +62,7 @@ const SAMPLE_STORIES = [
     highlight: 'The Sahara has expanded by approximately 10% since 1920.',
     centerLat: '14', centerLon: '0',
     newsKeywords: ['desertification', 'drought', 'dust storms'],
+    imageUrl: 'https://images.unsplash.com/photo-1610408546197-03cdebcd2d19?w=800&q=80',
   },
   {
     id: 'antarctic-ice-sheet',
@@ -68,6 +73,7 @@ const SAMPLE_STORIES = [
     highlight: 'Antarctica is losing ice mass at an accelerating rate of 150 billion tonnes per year — triple the rate from the 1990s.',
     centerLat: '-75', centerLon: '0',
     newsKeywords: ['sea level rise', 'ice sheet', 'Antarctica'],
+    imageUrl: 'https://images.unsplash.com/photo-1548625361-b1e605d8bcbc?w=800&q=80',
   },
 ];
 
@@ -205,18 +211,26 @@ const StoryMode = () => {
               >
                 <div className="aspect-video relative overflow-hidden bg-slate-200 dark:bg-slate-800">
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent z-10"></div>
-                  {/* Placeholder gradient based on variable */}
-                  <div
-                    className="w-full h-full"
-                    style={{
-                      background:
-                        story.variable === 'temperature'
-                          ? 'linear-gradient(135deg, #0f172a 0%, #7c3aed 50%, #f59e0b 100%)'
-                          : story.variable === 'precipitation'
-                          ? 'linear-gradient(135deg, #0f172a 0%, #0284c7 50%, #10b981 100%)'
-                          : 'linear-gradient(135deg, #0f172a 0%, #2563eb 100%)',
-                    }}
-                  />
+                  {story.imageUrl ? (
+                    <img 
+                      src={story.imageUrl} 
+                      alt={story.title} 
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                    />
+                  ) : (
+                    /* Fallback gradient if no image */
+                    <div
+                      className="w-full h-full"
+                      style={{
+                        background:
+                          story.variable === 'temperature'
+                            ? 'linear-gradient(135deg, #0f172a 0%, #7c3aed 50%, #f59e0b 100%)'
+                            : story.variable === 'precipitation'
+                            ? 'linear-gradient(135deg, #0f172a 0%, #0284c7 50%, #10b981 100%)'
+                            : 'linear-gradient(135deg, #0f172a 0%, #2563eb 100%)',
+                      }}
+                    />
+                  )}
                   <span className={`absolute top-4 left-4 ${tagColor(story.variable)} text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider z-20`}>
                     {story.variable}
                   </span>

@@ -29,7 +29,7 @@ const Sidebar = () => {
           <span className="material-symbols-outlined text-white">public</span>
         </div>
         <Link to="/" className="text-white text-lg font-bold font-display tracking-tight">
-          PyClimaExplorer
+          Cli-Lens
         </Link>
       </div>
 
@@ -50,7 +50,6 @@ const Sidebar = () => {
           </NavLink>
         )}
 
-        {/* Pro-only: Compare */}
         <NavLink to="/dashboard/compare" className={navItem} id="nav-compare">
           <span className="material-symbols-outlined">compare_arrows</span>
           <span>Compare</span>
@@ -64,13 +63,9 @@ const Sidebar = () => {
           <span>3D Globe</span>
         </NavLink>
 
-        {/* Pro-only: Predictions */}
         <NavLink to="/dashboard/predictions" className={navItem} id="nav-predictions">
           <span className="material-symbols-outlined">trending_up</span>
           <span>Predictions</span>
-          {!isPro && (
-            <span className="ml-auto material-symbols-outlined text-slate-600 text-sm">lock</span>
-          )}
         </NavLink>
 
         <p className="px-2 pt-6 pb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">Tools</p>
@@ -88,24 +83,13 @@ const Sidebar = () => {
         <NavLink to="/dashboard/reports" className={navItem} id="nav-reports">
           <span className="material-symbols-outlined">description</span>
           <span>Reports</span>
+          {!isPro && (
+            <span className="ml-auto material-symbols-outlined text-slate-600 text-sm">lock</span>
+          )}
         </NavLink>
       </nav>
 
-      {/* Pro upgrade banner */}
-      {!isPro && (
-        <div className="mx-4 mb-4 p-3 bg-primary/10 rounded-xl border border-primary/20">
-          <p className="text-xs font-bold text-primary mb-1">Free Plan</p>
-          <p className="text-[10px] text-slate-400 mb-2">
-            {user?.datasetsAnalyzed ?? 0}/3 analyses used
-          </p>
-          <Link
-            to="/public"
-            className="block w-full text-center bg-primary text-white text-xs font-bold py-1.5 rounded-lg hover:bg-primary/90 transition-colors"
-          >
-            Upgrade to Pro
-          </Link>
-        </div>
-      )}
+
 
       {/* User info footer */}
       <div className="p-4 border-t border-slate-800 flex items-center gap-3">
@@ -114,7 +98,7 @@ const Sidebar = () => {
         </div>
         <div className="flex flex-col truncate flex-1">
           <span className="text-white text-sm font-medium truncate">{user?.name || 'Loading…'}</span>
-          <span className="text-slate-500 text-xs capitalize">{user?.role} {isPro ? '· Pro' : '· Free'}</span>
+          <span className="text-slate-500 text-xs">{isPro ? 'Pro' : 'Free'}</span>
         </div>
         <button
           onClick={handleLogout}

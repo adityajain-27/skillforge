@@ -67,7 +67,7 @@ const ClimatePredictions = () => {
   const downloadReport = (type) => {
     const report = {
       generatedAt: new Date().toISOString(),
-      platform: 'PyClima Explorer',
+      platform: 'Cli-Lens',
       dataset: selectedDs?.name || selectedDs?.filename || 'Unknown',
       variable,
     };
@@ -143,7 +143,7 @@ const ClimatePredictions = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `pyclima-${type}-report-${variable}-${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `cli-lens-${type}-report-${variable}-${new Date().toISOString().split('T')[0]}.json`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -292,9 +292,15 @@ const ClimatePredictions = () => {
                   </p>
                 </div>
               </div>
-              <button onClick={() => downloadReport('location')} className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-lg transition-colors shadow-sm">
-                <span className="material-symbols-outlined text-sm">download</span> Download
-              </button>
+              {isPro ? (
+                <button onClick={() => downloadReport('location')} className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-lg transition-colors shadow-sm">
+                  <span className="material-symbols-outlined text-sm">download</span> Download
+                </button>
+              ) : (
+                <span className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-400 text-xs font-bold rounded-lg cursor-not-allowed" title="Pro feature">
+                  <span className="material-symbols-outlined text-sm">lock</span> Pro
+                </span>
+              )}
             </div>
             <PlotlyLineChart
               data={locationResult}
@@ -328,9 +334,15 @@ const ClimatePredictions = () => {
                   </p>
                 </div>
               </div>
-              <button onClick={() => downloadReport('global')} className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-lg transition-colors shadow-sm">
-                <span className="material-symbols-outlined text-sm">download</span> Download
-              </button>
+              {isPro ? (
+                <button onClick={() => downloadReport('global')} className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-lg transition-colors shadow-sm">
+                  <span className="material-symbols-outlined text-sm">download</span> Download
+                </button>
+              ) : (
+                <span className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-400 text-xs font-bold rounded-lg cursor-not-allowed" title="Pro feature">
+                  <span className="material-symbols-outlined text-sm">lock</span> Pro
+                </span>
+              )}
             </div>
             <PlotlyLineChart
               data={globalResult}
@@ -343,13 +355,22 @@ const ClimatePredictions = () => {
         {/* Full Report Download */}
         {(locationResult || globalResult) && (
           <div className="flex justify-center mt-2">
-            <button
-              onClick={() => downloadReport('full')}
-              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold rounded-xl transition-all shadow-lg shadow-amber-500/20 transform active:scale-[0.98]"
-            >
-              <span className="material-symbols-outlined">summarize</span>
-              Download Full Analysis Report
-            </button>
+            {isPro ? (
+              <button
+                onClick={() => downloadReport('full')}
+                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold rounded-xl transition-all shadow-lg shadow-amber-500/20 transform active:scale-[0.98]"
+              >
+                <span className="material-symbols-outlined">summarize</span>
+                Download Full Analysis Report
+              </button>
+            ) : (
+              <div className="flex flex-col items-center gap-2 px-6 py-4 bg-amber-50 dark:bg-amber-900/20 border-2 border-dashed border-amber-300 dark:border-amber-700 rounded-xl text-center">
+                <span className="material-symbols-outlined text-amber-500 text-2xl">lock</span>
+                <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">Download is a Pro feature</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Upgrade to export full analysis reports.</p>
+                <a href="/contact" className="mt-1 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold px-5 py-2 rounded-lg transition-colors">Upgrade to Pro</a>
+              </div>
+            )}
           </div>
         )}
 

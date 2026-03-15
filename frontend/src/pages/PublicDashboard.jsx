@@ -87,7 +87,7 @@ const PublicDashboard = () => {
             <div className="size-8 bg-primary rounded-lg flex items-center justify-center text-white shrink-0">
               <span className="material-symbols-outlined">tsunami</span>
             </div>
-            <h2 className="text-xl font-bold tracking-tight">PyClima</h2>
+            <h2 className="text-xl font-bold tracking-tight">Cli-Lens</h2>
           </div>
           <nav className="flex flex-col gap-1 flex-1">
             <Link to="/public" className="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/10 text-primary font-semibold">

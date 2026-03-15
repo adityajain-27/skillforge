@@ -186,7 +186,7 @@ const GlobeView = () => {
           <span className="text-sm font-medium hidden sm:block">Back to Dashboard</span>
         </Link>
         <div className="flex flex-col items-end">
-          <h1 className="text-lg sm:text-xl font-bold tracking-tight text-white uppercase">PyClima Explorer</h1>
+          <h1 className="text-lg sm:text-xl font-bold tracking-tight text-white uppercase">Cli-Lens</h1>
           <p className="text-[10px] sm:text-xs font-mono text-primary">3D_GLOBE_VISUALIZER</p>
         </div>
       </div>

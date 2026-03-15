@@ -6,6 +6,8 @@ import ProtectedRoute from './components/ProtectedRoute'
 // Pages
 import LandingPage from './pages/LandingPage'
 import SignInSignUp from './pages/SignInSignUp'
+import AboutUs from './pages/AboutUs'
+import Contact from './pages/Contact'
 import DashboardLayout from './components/layout/DashboardLayout'
 import ResearcherDashboard from './pages/ResearcherDashboard'
 import DatasetUpload from './pages/DatasetUpload'
@@ -26,6 +28,8 @@ function App() {
         <Route path="/" element={<MainLayout />}>
           <Route index element={<LandingPage />} />
           <Route path="login" element={<SignInSignUp />} />
+          <Route path="about" element={<AboutUs />} />
+          <Route path="contact" element={<Contact />} />
         </Route>
 
         {/* Protected dashboard routes — require login */}

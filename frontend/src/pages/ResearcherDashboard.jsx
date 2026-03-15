@@ -95,7 +95,7 @@ const ResearcherDashboard = () => {
       {/* Dashboard Content */}
       <main className="flex-1 overflow-y-auto p-6 space-y-6 bg-[#F8FAFC] dark:bg-background-dark">
         {/* Stat Cards Row */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
             <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-1">Datasets Uploaded</p>
             <p className="text-3xl font-bold font-mono text-slate-900 dark:text-white">{loading ? '—' : datasets.length}</p>
@@ -109,10 +109,6 @@ const ResearcherDashboard = () => {
             <p className={`text-3xl font-bold font-mono ${user?.tier === 'pro' ? 'text-amber-500' : 'text-slate-900 dark:text-white'}`}>
               {user?.tier ? user.tier.toUpperCase() : '—'}
             </p>
-          </div>
-          <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-            <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-1">Role</p>
-            <p className="text-3xl font-bold font-mono text-slate-900 dark:text-white capitalize">{user?.role ?? '—'}</p>
           </div>
         </div>
 
@@ -188,19 +184,19 @@ const ResearcherDashboard = () => {
           </div>
         </div>
 
-        {/* Pro-only features notice */}
+        {/* Pro upgrade notice */}
         {user?.tier !== 'pro' && (
           <div className="bg-gradient-to-r from-primary to-blue-700 text-white rounded-xl p-6 flex flex-col sm:flex-row justify-between items-center gap-4">
             <div>
-              <h3 className="font-bold text-lg mb-1">Upgrade to Pro</h3>
-              <p className="text-blue-100 text-sm">Unlock dataset comparison, climate predictions, and 3D globe.</p>
+              <h3 className="font-bold text-lg mb-1">Researcher Pro — Unlimited Access</h3>
+              <p className="text-blue-100 text-sm">All features are available. Upgrade for priority support and unlimited storage.</p>
             </div>
             <Link
-              to="/public"
+              to="/contact"
               id="upgrade-btn"
               className="bg-white text-primary font-bold px-6 py-2.5 rounded-lg text-sm hover:bg-blue-50 transition-colors shrink-0"
             >
-              Upgrade Now
+              Contact Us
             </Link>
           </div>
         )}
