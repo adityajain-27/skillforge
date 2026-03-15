@@ -24,6 +24,14 @@
 
 ---
 
+## 🔑 Demo Credentials
+
+To evaluate the live platform quickly without signing up, use these test accounts:
+- **Pro Researcher:** `aditya1@test.com` | Password: `adi123`
+- **Free Analyst:** `akshaychauhan1802@gmail.com` | Password: `akshay@2005`
+
+---
+
 ## 📌 Problem Statement
 
 Climate scientists generate **petabytes** of data annually — temperature records, precipitation maps, sea-level measurements — stored in complex scientific file formats (NetCDF). Analyzing this data typically requires Python scripting, specialized libraries, and hours of processing. **Non-technical stakeholders** (policymakers, students, journalists) are completely locked out.
