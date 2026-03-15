@@ -242,6 +242,9 @@ Open **http://localhost:5173** in your browser.
 ## 👨‍💻 Team
 
 - **Aditya Jain** — Full Stack Developer
+- **Akshay Chauhan** — Full Stack Developer
+- **Shambhavi Chauhan** — Full Stack Developer
+- **Devansh Parmar** — Full Stack Developer
 
 ---
 
