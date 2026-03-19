@@ -28,7 +28,7 @@
 
 To evaluate the live platform quickly without signing up, use these test accounts:
 - **Pro Researcher:** `aditya1@test.com` | Password: `adi123`
-- **Free Analyst:** `akshaychauhan1802@gmail.com` | Password: `akshay@2005`
+- **Free Analyst:** `akshay@123.com` | Password: `ak123`
 
 ---
 
